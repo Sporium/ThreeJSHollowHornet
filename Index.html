@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="stylesheet" type="text/css" href="styles.css" />
+	</head>
+	<body>
+		<script src="three.min.js"></script>
+		<script src="GLTFLoader.js"></script>
+		<script src="OrbitControls.js"></script>
+		<script src="ImageLoader.js"></script>
+		<script>
+			var scene, camera, renderer, controls, light, model;
+
+			function init() {
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color(0xdddddd);
+				// scene.background = new THREE.CubeTextureLoader()
+				// 	.setPath('model3/')
+				// 	.load(['1.png', '2.png', '3.png', '4.png', '1.png', '2.png']);
+
+				camera = new THREE.PerspectiveCamera(
+					60,
+					window.innerWidth / window.innerHeight,
+					1,
+					5000
+				);
+				camera.position.set(731, 556, 1094);
+				controls = new THREE.OrbitControls(camera);
+
+				// scene.add( new THREE.AxesHelper(500));
+
+				light = new THREE.SpotLight(0xffa95c, 4);
+				light.position.set(-50, 50, 50);
+				light.castShadow = true;
+				light.shadow.bias = -0.0001;
+				light.shadow.mapSize.width = 1024 * 4;
+				light.shadow.mapSize.height = 1024 * 4;
+				scene.add(light);
+
+				hemiLight = new THREE.HemisphereLight(0xffeeb1, 0x080820, 4);
+				scene.add(hemiLight);
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.toneMapping = THREE.ReinhardToneMapping;
+				renderer.toneMappingExposure = 2.3;
+				renderer.setSize(window.innerWidth, window.innerHeight);
+				renderer.shadowMap.enabled = true;
+				document.body.appendChild(renderer.domElement);
+
+				new THREE.GLTFLoader().load('model3/scene.gltf', (result) => {
+					model = result.scene.children[0];
+					model.position.set(0, -5, -25);
+					model.traverse((n) => {
+						if (n.isMesh) {
+							n.castShadow = true;
+							n.receiveShadow = true;
+							if (n.material.map) n.material.map.anisotropy = 1;
+						}
+					});
+					scene.add(model);
+
+					animate();
+				});
+			}
+			function animate() {
+				renderer.render(scene, camera);
+				light.position.set(
+					camera.position.x + 10,
+					camera.position.y + 10,
+					camera.position.z + 10
+				);
+				requestAnimationFrame(animate);
+			}
+
+			// create an AudioListener and add it to the camera
+			var listener = new THREE.AudioListener();
+
+			// create a global audio source
+			var sound = new THREE.Audio(listener);
+
+			// load a sound and set it as the Audio object's buffer
+			var audioLoader = new THREE.AudioLoader();
+			audioLoader.load('model3/HollowKnightHorne.mp3', function (buffer) {
+				sound.setBuffer(buffer);
+				sound.setLoop(true);
+				sound.setVolume(0.5);
+				sound.play();
+			});
+			init();
+		</script>
+	</body>
+</html>
