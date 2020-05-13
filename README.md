@@ -1,5 +1,6 @@
 # ThreeJSHollowHornet
 Hornet form Hollow Knight model in browser using ThreeJS
+You must run it from local server
 
 Node.js http-server
 Node.js has a simple HTTP server package. To install:
